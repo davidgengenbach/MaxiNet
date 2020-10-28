@@ -260,6 +260,7 @@ class WorkerServer(object):
         Args:
             command: command to call with optional parameters
         """
+        self.logger.debug("Daemonizing %s" % cmd)
         p = subprocess.Popen(cmd, shell=True)
         atexit.register(p.terminate)
 
