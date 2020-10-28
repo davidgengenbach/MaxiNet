@@ -5,3 +5,4 @@ dist
 Frontend/mininet
 *.pyc
 Frontend/config.py
+venv/

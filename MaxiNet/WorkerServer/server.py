@@ -221,8 +221,13 @@ class WorkerServer(object):
             Shell output of command
         """
         self.logger.debug("Executing %s" % cmd)
-        return subprocess.check_output(cmd, shell=True,
-                                       stderr=subprocess.STDOUT).strip()
+
+        try:
+            return subprocess.check_output(cmd, shell=True,
+                                           stderr=subprocess.STDOUT).strip()
+        except Exception as e:
+            print("error", e)
+        return ''
 
     @Pyro4.expose
     def script_check_output(self, cmd):
