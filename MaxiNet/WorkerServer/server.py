@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from subprocess import CalledProcessError
 
 from mininet.node import UserSwitch, OVSSwitch
 from mininet.link import Link, TCIntf
@@ -225,8 +226,9 @@ class WorkerServer(object):
         try:
             return subprocess.check_output(cmd, shell=True,
                                            stderr=subprocess.STDOUT).strip()
-        except Exception as e:
-            print("error", e)
+        except CalledProcessError as e:
+            self.logger.warn("Execution of '%s' failed with message: '%s', output: '%s', returncode: '%s'" % (cmd, e.message, e.output, e.returncode))
+            print("Error ex", e)
         return ''
 
     @Pyro4.expose
