@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 import argparse
 import atexit
@@ -68,7 +68,7 @@ class WorkerServer(object):
     def exit_handler(self, signal, frame):
         # I have absolutely no clue why but without this print atexit sometimes
         # doesn't seem to wait for called functions to finish...
-        print "exiting..."
+        print("exiting...")
         self._shutdown = True
         sys.exit()
 
@@ -83,7 +83,7 @@ class WorkerServer(object):
             except:
                 if self._ip != None:
                     #self.ip as an indicator that this worker was connected to the frontend once.
-                    print "Trying to reconnect to FrontendServer..."
+                    print("Trying to reconnect to FrontendServer...")
                     try:
                         try:
                             self._pyrodaemon.unregister(self)
@@ -181,7 +181,7 @@ class WorkerServer(object):
 
     @Pyro4.expose
     def get_hostname(self):
-        return subprocess.check_output(["hostname"]).strip()
+        return subprocess.check_output(["hostname"]).decode(sys.stdout.encoding).strip()
 
     def _stop(self):
         self.logger.info("signing out...")
@@ -222,10 +222,9 @@ class WorkerServer(object):
             Shell output of command
         """
         self.logger.debug("Executing %s" % cmd)
-
         try:
             return subprocess.check_output(cmd, shell=True,
-                                           stderr=subprocess.STDOUT).strip()
+                                           stderr=subprocess.STDOUT).decode(sys.stdout.encoding).strip()
         except CalledProcessError as e:
             self.logger.warn("Execution of '%s' failed with message: '%s', output: '%s', returncode: '%s'" % (cmd, e.message, e.output, e.returncode))
             print("Error ex", e)
@@ -318,7 +317,7 @@ class MininetManager(object):
             else:
                 self.net = Mininet(topo=topo, intf=TCIntf, link=TCLinkParams,
                                    switch=switch)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Failed to create mininet instance: %s" % traceback.format_exc())
             raise e
         if STT:
@@ -328,14 +327,14 @@ class MininetManager(object):
         for tunnel in tunnels:
             port = None
             cls = None
-            if "node1" not in tunnel[2].keys():
+            if "node1" not in list(tunnel[2].keys()):
                self.logger.info("Error! node1 is missing in tunnel metadata")
             if tunnel[2]["node1"] in topo.nodes():
                port = tunnel[2]["port1"]
             else:
                port = tunnel[2]["port2"]
 
-            if "cls" in tunnel[2].keys():
+            if "cls" in list(tunnel[2].keys()):
                 cls = tunnel[2]["cls"]
                 del tunnel[2]["cls"]
             self.addTunnel(tunnel[0], tunnel[1], port, cls, STT=STT, **tunnel[2])
@@ -436,9 +435,9 @@ def getFrontendStatus():
     if(manager_uri):
         manager = Pyro4.Proxy(manager_uri)
         manager._pyroHmacKey=pw
-        print manager.print_worker_status()
+        print(manager.print_worker_status())
     else:
-        print "Could not contact Frontend server at %s:%s" % (ip, port)
+        print("Could not contact Frontend server at %s:%s" % (ip, port))
 
 
 def main():
@@ -471,12 +470,12 @@ def main():
         pw = parsed.password
 
     if os.getuid() != 0:
-        print "MaxiNetWorker must run with root privileges!"
+        print("MaxiNetWorker must run with root privileges!")
         sys.exit(1)
 
     if not (ip and port and pw):
-        print "Please provide MaxiNet.cfg or specify ip, port and password of \
-               the Frontend Server."
+        print("Please provide MaxiNet.cfg or specify ip, port and password of \
+               the Frontend Server.")
     else:
         workerserver = WorkerServer()
 

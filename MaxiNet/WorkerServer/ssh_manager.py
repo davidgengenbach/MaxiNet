@@ -1,6 +1,7 @@
 import atexit
 import os
 import subprocess
+import sys
 
 import Pyro4
 
@@ -70,7 +71,8 @@ class SSH_Manager(object):
     @Pyro4.expose
     def get_host_key_fingerprint(self):
         return subprocess.check_output(["ssh-keygen", "-l", "-f",
-                                        os.path.join(self.folder, "ssh_host_rsa_key")]).strip()
+                                        os.path.join(self.folder, "ssh_host_rsa_key")]).strip().decode(
+            sys.stdout.encoding)
 
     @Pyro4.expose
     def initialize_ssh_folder(self, ip, port, user):
@@ -83,7 +85,7 @@ class SSH_Manager(object):
         #kill the process that might listen on MaxiNets sshd port:
         r = subprocess.call(["sudo", "fuser", "-k", "-n", "tcp", "%s" % self.port])
         if(r == 0):
-            print "Killed a process that listened on port %s in order to start MaxiNets sshd." % self.port
+            print("Killed a process that listened on port %s in order to start MaxiNets sshd." % self.port)
         self.popen = subprocess.Popen(["/usr/sbin/sshd", "-D",
                                        "-f",
                                        os.path.join(self.folder, "sshd_config")

@@ -20,16 +20,16 @@ try:
     print("Testing methods:")
     print("=================")
     print("updateCpuLimit():")
-    print("\t" + str(node_wrapper.updateCpuLimit(10000, 10000, 1, {0: "1", 1: "0"})))  # cpu_quota, cpu_period, cpu_shares, cores
+    print(("\t" + str(node_wrapper.updateCpuLimit(10000, 10000, 1, {0: "1", 1: "0"}))))  # cpu_quota, cpu_period, cpu_shares, cores
 
     print("updateMemoryLimit():")
-    print("\t" + str(node_wrapper.updateMemoryLimit(500)))
+    print(("\t" + str(node_wrapper.updateMemoryLimit(500))))
 
     print("")
     print("Testing attributes:")
     print("====================")
-    print("dimage = " + str(node_wrapper.disk_image))
-    print("resources = " + str(node_wrapper.resources))
+    print(("dimage = " + str(node_wrapper.disk_image)))
+    print(("resources = " + str(node_wrapper.resources)))
 
 finally:
     exp.stop()

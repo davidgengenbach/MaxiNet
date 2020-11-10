@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # Dynamically remove a link from the topology.
@@ -18,23 +18,23 @@ cluster = maxinet.Cluster()
 exp = maxinet.Experiment(cluster, topo)
 exp.setup()
 
-print "waiting 5 seconds for routing algorithms on the controller to converge"
+print("waiting 5 seconds for routing algorithms on the controller to converge")
 time.sleep(5)
 
-print exp.get_node("h1").cmd("ping -c 5 10.0.0.4")  # check connectivity
+print(exp.get_node("h1").cmd("ping -c 5 10.0.0.4"))  # check connectivity
 
-raw_input("[Continue]")
-print "shutting down link..."
+input("[Continue]")
+print("shutting down link...")
 
 exp.configLinkStatus("s5", "s7", "down")
 
-print exp.get_node("h1").cmd("ping -c 5 10.0.0.4")  # check connectivity
-raw_input("[Continue]")
+print(exp.get_node("h1").cmd("ping -c 5 10.0.0.4"))  # check connectivity
+input("[Continue]")
 
-print "reestablishing link..."
+print("reestablishing link...")
 exp.configLinkStatus("s5", "s7", "up")
 
-print exp.get_node("h1").cmd("ping -c 5 10.0.0.4")  # check connectivity
+print(exp.get_node("h1").cmd("ping -c 5 10.0.0.4"))  # check connectivity
 
-raw_input("[Continue]")
+input("[Continue]")
 exp.stop()

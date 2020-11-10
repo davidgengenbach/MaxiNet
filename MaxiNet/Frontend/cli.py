@@ -23,7 +23,7 @@ class CLI(Cmd):
                 self.cmdloop()
                 break
             except KeyboardInterrupt:
-                print "\nInterrupt"
+                print("\nInterrupt")
 
     def emptyline(self):
         pass
@@ -32,14 +32,14 @@ class CLI(Cmd):
         "Print help"
         Cmd.do_help(self, s)
         if s is "":
-            print self.helpStr
+            print(self.helpStr)
 
     def do_hosts(self, s):
         "Print all hostnames"
         h = ""
         for host in self.experiment.hosts:
             h = h + " " + host.name
-        print h
+        print(h)
 
     def do_workers(self, s):
         "Print all workers; worker id in brackets"
@@ -47,7 +47,7 @@ class CLI(Cmd):
         for worker in self.experiment.cluster.worker:
             wid = self.experiment.hostname_to_workerid[worker.hn()]
             h = h + " " + worker.hn() + "[" + str(wid) + "]"
-        print h
+        print(h)
 
     def do_switches(self, s):
         "Print all switchnames; worker id in brackets"
@@ -58,7 +58,7 @@ class CLI(Cmd):
             ]
             h = h + " " + switch.name +\
                 "[" + str(wid) + "]"
-        print h
+        print(h)
 
     def do_pingall(self, s):
         """Do ping between all hosts (or between one and all other hosts
@@ -74,14 +74,14 @@ class CLI(Cmd):
                     sys.stdout.write(host.name + " -> " + target.name)
                     sent += 1.0
                     if(host.pexec("ping -c1 " + target.IP())[2] != 0):
-                        print " X"
+                        print(" X")
                     else:
                         received += 1.0
-                        print ""
+                        print("")
         else:
             host = self.experiment.get(s)
             if(host is None):
-                print "Error: Node " + s + " does not exist"
+                print("Error: Node " + s + " does not exist")
             else:
                 for target in self.experiment.hosts:
                     if(target == host):
@@ -89,12 +89,12 @@ class CLI(Cmd):
                     sys.stdout.write(host.name + " -> " + target.name)
                     sent += 1.0
                     if(host.pexec("ping -c1 " + target.IP())[2] != 0):
-                        print " X"
+                        print(" X")
                     else:
                         received += 1.0
-                        print ""
-        print "*** Results: %.2f%% dropped (%d/%d received)" % \
-                    ((1.0 - received / sent) * 100.0, int(received), int(sent))
+                        print("")
+        print("*** Results: %.2f%% dropped (%d/%d received)" % \
+                    ((1.0 - received / sent) * 100.0, int(received), int(sent)))
 
     def do_dpctl(self, s):
         "execute dpctl at switch"
@@ -103,17 +103,17 @@ class CLI(Cmd):
         cmd = " ".join(sp[1:len(sp)])
         switch = self.experiment.get(sw)
         if(switch is None):
-            print "Error: Switch " + sw + " does not exist"
+            print("Error: Switch " + sw + " does not exist")
         else:
-            print switch.dpctl(cmd)
+            print(switch.dpctl(cmd))
 
     def do_ip(self, s):
         "Print ip of host"
         node = self.experiment.get(s)
         if(node is None):
-            print "Error: Node " + s + " does not exist"
+            print("Error: Node " + s + " does not exist")
         else:
-            print node.IP()
+            print(node.IP())
 
     def do_py(self, s):
         "Execute Python command"
@@ -121,7 +121,7 @@ class CLI(Cmd):
         main = __import__("__main__")
         try:
             exec(cmd, self.pglobals, self.plocals)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
 
     def do_xterm(self, s):
@@ -129,7 +129,7 @@ class CLI(Cmd):
         nodes = s.split()
         for node in nodes:
             if(self.experiment.get(node) is None):
-                print "Error: Node " + s + " does not exist"
+                print("Error: Node " + s + " does not exist")
             else:
                 self.default(node + " xterm -title MaxiNet-" + node + " &")
                 time.sleep(0.2)
@@ -161,7 +161,7 @@ class CLI(Cmd):
 
                 subprocess.call(rcmd)
             else:
-                print "Error: Node " + node + " does not exist"
+                print("Error: Node " + node + " does not exist")
         elif node_wrapper.is_docker():
             sys.stdout.write(node_wrapper.cmdPrint(cmd))
         else:
@@ -179,7 +179,7 @@ class CLI(Cmd):
                 user = subprocess.check_output(
                         sshtool.get_ssh_cmd(targethostname=hn,
                                             cmd="echo $USER", opts=["-t"])
-                       ).strip()
+                       ).strip().decode(sys.stdout.encoding)
                 opts=["-t","-X"]
                 if not blocking:
                     opts.append("-n")

@@ -1,5 +1,6 @@
 import atexit
-from ConfigParser import RawConfigParser
+import sys
+from configparser import RawConfigParser
 from mininet.topo import Topo
 import logging
 import os
@@ -18,22 +19,23 @@ if hasattr(Pyro4.config, 'SERIALIZERS_ACCEPTED'):
     Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
 Pyro4.config.SERIALIZER = 'pickle'
 
+
 class MaxiNetConfig(RawConfigParser):
 
     def __init__(self, file=None, register=False, **args):
         RawConfigParser.__init__(self, **args)
         self.logger = logging.getLogger(__name__)
         self.daemon = None
-        if(file is None):
+        if (file is None):
             self.read(["/etc/MaxiNet.cfg", os.path.expanduser("~/.MaxiNet.cfg"),
                        "MaxiNet.cfg"])
         self.set_loglevel()
-        if(register):
+        if (register):
             self.register()
 
     @Pyro4.expose
     def set_loglevel(self, level=None):
-        if(level is None):
+        if (level is None):
             level = self.get_loglevel()
         logging.basicConfig(level=level)
 
@@ -61,34 +63,34 @@ class MaxiNetConfig(RawConfigParser):
 
     @Pyro4.expose
     def get_worker_ip(self, hostname, classifier=None):
-        if(not self.has_section(hostname)):
+        if (not self.has_section(hostname)):
             self.logger.warn("Unknown hostname: %s" % hostname)
             return None
         else:
-            if(classifier is None):
+            if (classifier is None):
                 return self.get(hostname, "ip")
             else:
-                if(not self.has_option(hostname, "ip_%s" % classifier)):
+                if (not self.has_option(hostname, "ip_%s" % classifier)):
                     return self.get_worker_ip(hostname)
                 else:
                     return self.get(hostname, "ip_%s" % classifier)
 
     @Pyro4.expose
     def run_with_1500_mtu(self):
-        if(self.has_option("all","runWith1500MTU")):
-            return self.getboolean("all","runWith1500MTU")
+        if (self.has_option("all", "runWith1500MTU")):
+            return self.getboolean("all", "runWith1500MTU")
         return False
 
     @Pyro4.expose
     def use_stt_tunneling(self):
-        if(self.has_option("all","useSTT")):
-            return self.getboolean("all","useSTT")
+        if (self.has_option("all", "useSTT")):
+            return self.getboolean("all", "useSTT")
         return False
 
     @Pyro4.expose
     def deactivateTSO(self):
-        if(self.has_option("all","deactivateTSO")):
-            return self.getboolean("all","deactivateTSO")
+        if (self.has_option("all", "deactivateTSO")):
+            return self.getboolean("all", "deactivateTSO")
         return False
 
     @Pyro4.expose
@@ -110,7 +112,8 @@ class MaxiNetConfig(RawConfigParser):
         return lvls[lvl]
 
     def register(self):
-        self.nameserver = Pyro4.locateNS(self.get_nameserver_ip(), self.get_nameserver_port(), hmac_key=self.get_nameserver_password())
+        self.nameserver = Pyro4.locateNS(self.get_nameserver_ip(), self.get_nameserver_port(),
+                                         hmac_key=self.get_nameserver_password())
         self.daemon = Pyro4.Daemon(host=self.get_nameserver_ip())
         self.daemon._pyroHmacKey = self.get_nameserver_password()
         uri = self.daemon.register(self)
@@ -121,7 +124,7 @@ class MaxiNetConfig(RawConfigParser):
         atexit.register(self.unregister)
 
     def unregister(self):
-        if(self.daemon):
+        if (self.daemon):
             self.nameserver.remove("config")
             self.daemon.shutdown()
             self.daemon = None
@@ -129,11 +132,11 @@ class MaxiNetConfig(RawConfigParser):
             self.daemon_thread = None
 
     @Pyro4.expose
-    def get(self, section, option):
-        return RawConfigParser.get(self, section, option)
+    def get(self, section, option, **kwargs):
+        return RawConfigParser.get(self, section, option, **kwargs)
 
     @Pyro4.expose
-    def set(self, section, option, val):
+    def set(self, section, option, val, **kwargs):
         return RawConfigParser.set(self, section, option, val)
 
     @Pyro4.expose
@@ -149,12 +152,13 @@ class MaxiNetConfig(RawConfigParser):
         return RawConfigParser.has_option(self, section, option)
 
     @Pyro4.expose
-    def getint(self, section, option):
-        return RawConfigParser.getint(self, section, option)
+    def getint(self, section, option, **kwargs):
+        return RawConfigParser.getint(self, section, option, **kwargs)
 
     @Pyro4.expose
-    def getboolean(self, section, option):
-        return RawConfigParser.getboolean(self, section, option)
+    def getboolean(self, section, option, **kwargs):
+        return RawConfigParser.getboolean(self, section, option, **kwargs)
+
 
 class SSH_Tool(object):
 
@@ -178,27 +182,27 @@ class SSH_Tool(object):
     def get_ssh_cmd(self, targethostname, cmd, opts=None):
         rip = self.config.get_worker_ip(targethostname)
 
-        #workaround: for some reason ssh-ing into localhost using localhosts external IP does not work.
-        #hence, we replace the external ip with localhost if necessary.
-        local = subprocess.check_output("ip route get %s" % rip, shell=True)
+        # workaround: for some reason ssh-ing into localhost using localhosts external IP does not work.
+        # hence, we replace the external ip with localhost if necessary.
+        local = subprocess.check_output("ip route get %s" % rip, shell=True).decode(sys.stdout.encoding)
         if (local[0:5] == "local"):
             rip = "localhost"
 
         user = self.config.get("all", "sshuser")
-        if(rip is None):
+        if (rip is None):
             return None
         cm = ["ssh", "-p", str(self.config.get_sshd_port()), "-o",
               "UserKnownHostsFile=%s" % self.known_hosts,
               "-q", "-i", self.key_priv]
-        if(opts):
+        if (opts):
             cm.extend(opts)
         cm.append("%s@%s" % (user, rip))
-        if(type(cmd) == str):
-            if(self.config.getboolean("all", "usesudo")):
-                cmd = "sudo "+cmd
+        if (type(cmd) == str):
+            if (self.config.getboolean("all", "usesudo")):
+                cmd = "sudo " + cmd
             cm.append(cmd)
         else:
-            if(self.config.getboolean("all", "usesudo")):
+            if (self.config.getboolean("all", "usesudo")):
                 cmd = ["sudo"] + cmd
             cm.extend(cmd)
         return cm
@@ -206,17 +210,17 @@ class SSH_Tool(object):
     def get_scp_put_cmd(self, targethostname, local, remote, opts=None):
         rip = self.config.get_worker_ip(targethostname)
 
-        loc = subprocess.check_output("ip route get %s" % rip, shell=True)
+        loc = subprocess.check_output("ip route get %s" % rip, shell=True).decode(sys.stdout.encoding)
         if (loc[0:5] == "local"):
             rip = "localhost"
 
         user = self.config.get("all", "sshuser")
-        if(rip is None):
+        if (rip is None):
             return None
         cmd = ["scp", "-P", str(self.config.get_sshd_port()), "-o",
                "UserKnownHostsFile=%s" % self.known_hosts,
                "-r", "-i", self.key_priv]
-        if(opts):
+        if (opts):
             cmd.extend(opts)
         cmd.extend([local, "%s@%s:\"%s\"" % (user, rip, remote)])
         return cmd
@@ -224,17 +228,17 @@ class SSH_Tool(object):
     def get_scp_get_cmd(self, targethostname, remote, local, opts=None):
         rip = self.config.get_worker_ip(targethostname)
 
-        loc = subprocess.check_output("ip route get %s" % rip, shell=True)
+        loc = subprocess.check_output("ip route get %s" % rip, shell=True).decode(sys.stdout.encoding)
         if (loc[0:5] == "local"):
             rip = "localhost"
 
         user = self.config.get("all", "sshuser")
-        if(rip is None):
+        if (rip is None):
             return None
         cmd = ["scp", "-P", str(self.config.get_sshd_port()), "-o",
                "UserKnownHostsFile=%s" % self.known_hosts,
                "-r", "-i", self.key_priv]
-        if(opts):
+        if (opts):
             cmd.extend(opts)
         cmd.extend(["%s@%s:\"%s\"" % (user, rip, remote), local])
         return cmd
@@ -242,7 +246,7 @@ class SSH_Tool(object):
     def get_rsync_put_cmd(self, targethostname, local, remote, opts=None):
         rip = self.config.get_worker_ip(targethostname)
 
-        loc = subprocess.check_output("ip route get %s" % rip, shell=True)
+        loc = subprocess.check_output("ip route get %s" % rip, shell=True).decode(sys.stdout.encoding)
         if (loc[0:5] == "local"):
             rip = "localhost"
 
@@ -263,7 +267,7 @@ class SSH_Tool(object):
     def get_rsync_get_cmd(self, targethostname, remote, local, opts=None):
         rip = self.config.get_worker_ip(targethostname)
 
-        loc = subprocess.check_output("ip route get %s" % rip, shell=True)
+        loc = subprocess.check_output("ip route get %s" % rip, shell=True).decode(sys.stdout.encoding)
         if (loc[0:5] == "local"):
             rip = "localhost"
 
@@ -280,17 +284,17 @@ class SSH_Tool(object):
         cmd.extend(["%s@%s:%s" % (user, rip, remote), local])
         return cmd
 
-
     def add_known_host(self, ip):
         with open(self.known_hosts, "a") as kh:
             fp = subprocess.check_output(["ssh-keyscan", "-p",
-                                          str(self.config.get_sshd_port()), ip])
+                                          str(self.config.get_sshd_port()), ip]).decode(sys.stdout.encoding).strip()
             kh.write(fp)
 
     def _cleanup(self):
         subprocess.call(["rm", self.key_priv])
         subprocess.call(["rm", self.key_pub])
         subprocess.call(["rmdir", os.path.dirname(self.key_priv)])
+
 
 #
 # Fat-tree topology implemention for mininet
@@ -317,10 +321,10 @@ class FatTree(Topo):
         numLeafes = hosts
         bw = bwlimit
         s = 1
-        #bw = 10
+        # bw = 10
         for i in range(numLeafes):
             h = self.addHost('h' + str(i + 1), mac=self.makeMAC(i),
-                            ip="10.0.0." + str(i + 1))
+                             ip="10.0.0." + str(i + 1))
             sw = self.addSwitch('s' + str(s), dpid=self.makeDPID(s),
                                 **dict(listenPort=(13000 + s - 1)))
             s = s + 1
@@ -361,7 +365,7 @@ class Tools(object):
 
     @staticmethod
     def makeMAC(i):
-        return Tools.randByte(127) + ":" + Tools.randByte() + ":" +\
+        return Tools.randByte(127) + ":" + Tools.randByte() + ":" + \
                Tools.randByte() + ":00:00:" + hex(i)[2:]
 
     @staticmethod
@@ -376,12 +380,14 @@ class Tools(object):
 
     @staticmethod
     def time_to_string(t):
-        if(t):
+        if (t):
             return time.strftime("%Y-%m-%d_%H:%M:%S", t)
         else:
             return time.strftime("%Y-%m-%d_%H:%M:%S")
 
     @staticmethod
     def guess_ip():
-        ip = subprocess.check_output("ifconfig -a | awk '/(cast)/ { print $2 }' | cut -d':' -f2 | head -1", shell=True)
+        ip = subprocess.check_output("ifconfig -a | awk '/(cast)/ { print $2 }' | cut -d':' -f2 | head -1", shell=True).decode(
+            sys.stdout.encoding).strip()
+
         return ip.strip()

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # This example shows how to transfer files between workers and the frontend.
@@ -37,10 +37,10 @@ w3.get_file("/tmp/testfile1", "/tmp/")
 # system of the worker
 w3.put_file("/tmp/testfile1", "/tmp/testfile2")
 
-print w3.run_cmd("md5sum /tmp/testfile1").strip()
-print w3.run_cmd("md5sum /tmp/testfile2").strip()
+print(w3.run_cmd("md5sum /tmp/testfile1").strip())
+print(w3.run_cmd("md5sum /tmp/testfile2").strip())
 # compare files
-print subprocess.check_output(["md5sum", "/tmp/testfile1"]).strip()
+print(subprocess.check_output(["md5sum", "/tmp/testfile1"]).strip())
 
 w3.run_cmd("rm /tmp/testfile1")  # remove file from worker
 w3.run_cmd("rm /tmp/testfile2")  # remove file from worker

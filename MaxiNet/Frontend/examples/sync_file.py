@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # This example shows how to sync files between workers and the frontend.
@@ -32,9 +32,9 @@ testfile = "/tmp/testfile1"
 w3.run_cmd("dd if=/dev/urandom of=%s bs=1024 count=2048" % testfile)
 w3.sync_get_file(testfile, testfile)
 
-print(w3.run_cmd("md5sum %s" % testfile).strip())
+print((w3.run_cmd("md5sum %s" % testfile).strip()))
 # compare files
-print(subprocess.check_output(["md5sum", testfile]).strip())
+print((subprocess.check_output(["md5sum", testfile]).strip()))
 
 time.sleep(2)
 

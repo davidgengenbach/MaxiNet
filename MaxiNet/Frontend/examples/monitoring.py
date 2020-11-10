@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # For performance monitoring, MaxiNet has build-in functions to log
@@ -24,9 +24,9 @@ exp.setup()
 exp.monitor()  # start monitoring
 
 time.sleep(5)
-print exp.get_node("h4").cmd("iperf -s &")  # open iperf server on h4
+print(exp.get_node("h4").cmd("iperf -s &"))  # open iperf server on h4
 # generate traffic between h1 and h4
-print exp.get_node("h1").cmd("iperf -c 10.0.0.4")
+print(exp.get_node("h1").cmd("iperf -c 10.0.0.4"))
 time.sleep(2)
 exp.stop()
 

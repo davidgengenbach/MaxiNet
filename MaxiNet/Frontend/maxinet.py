@@ -65,8 +65,8 @@ def deprecated(func):
         warnings.warn_explicit(
             "Call to deprecated function {}.".format(func.__name__),
             category=DeprecationWarning,
-            filename=func.func_code.co_filename,
-            lineno=func.func_code.co_firstlineno + 1)
+            filename=func.__code__.co_filename,
+            lineno=func.__code__.co_firstlineno + 1)
         return func(*args, **kwargs)
     return new_func
 
@@ -83,7 +83,7 @@ def run_cmd(cmd):
     Returns:
         Stdout of cmd call as string.
     """
-    return subprocess.check_output(cmd, shell=False)
+    return subprocess.check_output(cmd, shell=False).decode(sys.stdout.encoding)
 
 
 def run_cmd_shell(cmd):
@@ -98,7 +98,7 @@ def run_cmd_shell(cmd):
     Returns:
         Stdout of cmd call as string.
     """
-    return subprocess.check_output(cmd, shell=True)
+    return subprocess.check_output(cmd, shell=True).decode(sys.stdout.encoding)
 
 
 class Worker(object):
@@ -238,7 +238,7 @@ class Worker(object):
                 display = subprocess.check_output(
                             self.sshtool.get_ssh_cmd(targethostname=self.hn(),
                                                      cmd="env | grep DISPLAY",
-                                                     opts=["-Y"]))[8:]
+                                                     opts=["-Y"])).decode(sys.stdout.encoding).strip()[8:]
                 self.mininet.tunnelX11(node, display)
                 self._x11tunnels.append(node)
             except subprocess.CalledProcessError:
@@ -624,11 +624,11 @@ class Cluster(object):
         atexit.register(self._stop)
 
         #register this Cluster to the nameserver as key self.ident:
-        myIP = subprocess.check_output("ip route get %s | cut -d' ' -f1" % ip, shell=True)
+        myIP = subprocess.check_output("ip route get %s | cut -d' ' -f1" % ip, shell=True).decode(sys.stdout.encoding)
         if (myIP.strip() == "local"):
             myIP = "127.0.0.1"
         else:
-            myIP = subprocess.check_output("ip route get %s" % ip, shell=True).split("src")[1].split()[0]
+            myIP = subprocess.check_output("ip route get %s" % ip, shell=True).split("src")[1].split()[0].decode(sys.stdout.encoding)
 
         self._pyrodaemon = Pyro4.Daemon(host=myIP)
         self._pyrodaemon._pyroHmacKey=password
@@ -716,7 +716,7 @@ class Cluster(object):
         Returns:
             True if worker was successfully added, False if not.
         """
-        hns = self.get_available_workers().keys()
+        hns = list(self.get_available_workers().keys())
         for hn in hns:
             if(self.add_worker_by_hostname(hn)):
                 return True
@@ -1016,10 +1016,10 @@ class Experiment(object):
         if(len(d) != len(self.cluster.workers())):
             return False
         for w in self.cluster.workers():
-            if(not w.hn() in d.keys()):
+            if(not w.hn() in list(d.keys())):
                 return False
         for i in range(0, len(self.cluster.workers())):
-            if (d.values().count(i) != 1):
+            if (list(d.values()).count(i) != 1):
                 return False
         return True
 

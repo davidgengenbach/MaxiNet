@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # Start sshd on the emulated hosts and create a specialized host
@@ -46,7 +46,7 @@ h2.cmd("/usr/sbin/sshd -o UseDNS=no -u0 -o \"Banner /tmp/%s.banner\"" %
 
 # Locate worker which runs on Frontend
 for w in cluster.workers():
-    if w.run_cmd("hostname") == subprocess.check_output(["hostname"]).strip():
+    if w.run_cmd("hostname") == subprocess.check_output(["hostname"]).decode(sys.stdout.encoding).strip():
         wid = exp.hostname_to_workerid[w.run_cmd("hostname")]
 # Add host and switch on Frontend worker.
 # Switch is needed as tunnels are only possible between switches
@@ -60,8 +60,8 @@ exp.addLink("s3", "s1", autoconf=True)
 # Therefore we cannot set the IP before.
 exp.get("root").setIP("10.0.0.3", 8)
 
-print "*** You may now ssh into", h1.name, "at", h1.IP(), "or", h2.name,\
-      "at", h2.IP()
-print "Press [Enter] to end MaxiNet"
-raw_input()
+print("*** You may now ssh into", h1.name, "at", h1.IP(), "or", h2.name,\
+      "at", h2.IP())
+print("Press [Enter] to end MaxiNet")
+input()
 exp.stop()

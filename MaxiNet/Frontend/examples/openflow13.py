@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # Minimal example showing how to use MaxiNet with OpenFlow 1.3.
@@ -24,9 +24,9 @@ for switch in exp.switches:
                             'protocols=OpenFlow10,OpenFlow12,OpenFlow13')
 
 #Create some Flows
-print exp.get_node("h1").cmd("ping -c 5 10.0.0.4")
+print(exp.get_node("h1").cmd("ping -c 5 10.0.0.4"))
 
 #Dump Flows with OpenFlow 1.3 Command
-print exp.get("s1").dpctl("-O OpenFlow13 dump-flows")
+print(exp.get("s1").dpctl("-O OpenFlow13 dump-flows"))
 
 exp.stop()

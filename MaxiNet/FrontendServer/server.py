@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 import atexit
 import logging
@@ -132,12 +132,12 @@ class MaxiNetManager(object):
         otherwise, deallocate the workers from the cluster
         """
 
-        print "Monitoring clusters..."
+        print("Monitoring clusters...")
 
         while(True):
             time.sleep(5)   #we check all 5 seconds.
             clusters = list()
-            for worker in self._worker_dict.keys():
+            for worker in list(self._worker_dict.keys()):
                 if (self._worker_dict[worker]["assigned"] != None):
                     if (not (self._worker_dict[worker]["assigned"] in clusters)):
                         clusters.append(self._worker_dict[worker]["assigned"])
@@ -158,7 +158,7 @@ class MaxiNetManager(object):
                 if(not alive):
                     #we just detected that this cluster is no more alive!
                     self.logger.warn("Detected a hung cluster. Freeing workers.")
-                    for worker in self._worker_dict.keys():
+                    for worker in list(self._worker_dict.keys()):
                         if(self._worker_dict[worker]["assigned"] == cluster):
                             pn = self._worker_dict[worker]["pyroname"]+".mnManager"
                             p = Pyro4.Proxy(self._ns.lookup(pn))
@@ -224,8 +224,7 @@ class MaxiNetManager(object):
         returns: True if FrontendServer was successfully stopped, False if not
         """
         self._worker_dict_lock.acquire()
-        if (len(filter(lambda x: not (x["assigned"] is None),
-                       self._worker_dict.values())) > 0):
+        if (len([x for x in list(self._worker_dict.values()) if not (x["assigned"] is None)]) > 0):
             self.logger.warn("shutdown not possible as there are still \
                              reserved workers")
             self._worker_dict_lock.release()
@@ -272,7 +271,7 @@ class MaxiNetManager(object):
         out += "Number of connected workers: %d\n" % numWorkers
         if numWorkers > 0:
             out += "--------------------------------\n"
-        for worker_name in self._worker_dict.keys():
+        for worker_name in list(self._worker_dict.keys()):
             status = "free"
             if (self._worker_dict[worker_name]["assigned"]):
                 status = "assigned to %s" % self._worker_dict[worker_name]["assigned"]
@@ -374,8 +373,7 @@ class MaxiNetManager(object):
         """Get list of unassigned workers"""
         rd = {}
         self._worker_dict_lock.acquire()
-        w = filter(lambda x: self._worker_dict[x]["assigned"] is None,
-                   self._worker_dict)
+        w = [x for x in self._worker_dict if self._worker_dict[x]["assigned"] is None]
         for x in w:
             rd[x] = self._worker_dict[x]
         self._worker_dict_lock.release()

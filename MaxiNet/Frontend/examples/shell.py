@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 #
 # This example shows how to use MaxiNet's CommandLineInterface (CLI).

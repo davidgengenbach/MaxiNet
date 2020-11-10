@@ -11,31 +11,31 @@ from mininet.topo import Topo
 
 
 def call_method(node, cmd, *params1, **params2):
-    print(node.nn + "." + cmd + "()")
+    print((node.nn + "." + cmd + "()"))
     ok = False
     try:
-        print("\t->" + str(node._call(cmd, *params1, **params2)))
+        print(("\t->" + str(node._call(cmd, *params1, **params2))))
         ok = True
     except Exception as e:
         print("\tFAILED")
         traceback.print_exc()
     if ok:
         print("\tOKAY")
-    print
+    print()
 
 
 def get_attribute(node, attribute):
-    print(node.nn + "." + attribute)
+    print((node.nn + "." + attribute))
     ok = False
     try:
-        print("\t->" + str(node._get(attribute)))
+        print(("\t->" + str(node._get(attribute))))
         ok = True
     except Exception as e:
         print("\tFAILED")
         traceback.print_exc()
     if ok:
         print("\tOKAY")
-    print
+    print()
 
 
 topo = Topo()

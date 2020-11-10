@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -9,7 +9,7 @@ import numpy as np
 
 
 try:
-    subprocess.check_output("env | grep DISPLAY", shell=True)
+    subprocess.check_output("env | grep DISPLAY", shell=True).decode(sys.stdout.encoding)
 except:
     mpl.use("Agg")
 

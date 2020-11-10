@@ -1,5 +1,5 @@
 install:
-	python2 setup.py install
+	python3 setup.py install
 	mkdir -p /usr/local/share/MaxiNet
 	cp -rv MaxiNet/Frontend/examples /usr/local/share/MaxiNet/
 	chmod +x /usr/local/share/MaxiNet/examples/*
