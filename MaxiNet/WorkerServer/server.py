@@ -226,7 +226,7 @@ class WorkerServer(object):
             return subprocess.check_output(cmd, shell=True,
                                            stderr=subprocess.STDOUT).decode(sys.stdout.encoding).strip()
         except CalledProcessError as e:
-            self.logger.warn("Execution of '%s' failed with message: '%s', output: '%s', returncode: '%s'" % (cmd, e.message, e.output, e.returncode))
+            self.logger.warn("Execution of '%s', output: '%s', returncode: '%s'" % (cmd, e.output, e.returncode))
             print("Error ex", e)
         return ''
 
